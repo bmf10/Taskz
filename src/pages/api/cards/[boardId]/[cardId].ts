@@ -1,7 +1,7 @@
 import { NextApiHandler } from "next"
 import dbConnect from "@/libs/mongoose"
-import deleteHandler from "@/services/boards/delete"
-import findOneHandler from "@/services/boards/findOne"
+import findOneHandler from "@/services/cards/findOne"
+import deleteHandler from "@/services/cards/delete"
 
 const requestHandler: NextApiHandler = async (req, res) => {
   try {

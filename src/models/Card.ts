@@ -1,38 +1,35 @@
 import mongoose, { ObjectId } from "mongoose"
-import { ICard } from "./Card"
 
-export interface IBoard {
+export interface ICard {
   readonly _id: string
   readonly name: string
   readonly isDeleted: boolean
   readonly order: number
-  readonly userId: ObjectId
+  readonly boardId: ObjectId
   readonly createdAt: Date
   readonly updateAt: Date
-  readonly cards: ICard[]
 }
 
-const BoardSchema = new mongoose.Schema<IBoard>(
+const CardSchema = new mongoose.Schema<ICard>(
   {
     name: { type: String, required: true },
     isDeleted: { type: Boolean, default: false },
-    userId: {
+    boardId: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      ref: "Board",
     },
     order: { type: Number, required: true },
-    cards: [{ type: mongoose.Types.ObjectId, ref: "Card" }],
   },
   { timestamps: true }
 )
 
-BoardSchema.pre("find", function () {
+CardSchema.pre("find", function () {
   this.where({ isDeleted: false })
 })
 
-BoardSchema.pre("findOne", function () {
+CardSchema.pre("findOne", function () {
   this.where({ isDeleted: false })
 })
 
-export default mongoose.models.Board ||
-  mongoose.model<IBoard>("Board", BoardSchema, "boards")
+export default mongoose.models.Card ||
+  mongoose.model<ICard>("Card", CardSchema, "cards")

@@ -8,7 +8,7 @@ interface Query {
   readonly boardId: string
 }
 
-const deleteHandler = async (
+const findOneHandler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<unknown> => {
@@ -19,13 +19,16 @@ const deleteHandler = async (
     return res.status(403).end()
   }
 
-  const board = await Board.findOneAndUpdate(
-    { userId: new ObjectId(session!.user!.id), _id: new ObjectId(boardId) },
-    { isDeleted: true },
-    { new: true }
-  ).exec()
+  const board = await Board.findOne({
+    userId: new ObjectId(session!.user!.id),
+    _id: new ObjectId(boardId),
+  }).exec()
+
+  if (!board) {
+    return res.status(404).end()
+  }
 
   return res.status(201).json({ board })
 }
 
-export default deleteHandler
+export default findOneHandler

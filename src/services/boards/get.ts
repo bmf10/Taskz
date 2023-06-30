@@ -11,7 +11,7 @@ const getHandler = async (
   const session = await getServerSession(req, res, authOptions)
 
   if (!session?.user?.id) {
-    return res.status(403)
+    return res.status(403).end()
   }
 
   const boards = await Board.find({

@@ -17,7 +17,7 @@ const patchHandler = async (
   const { boardId, name } = req.body as Body
 
   if (!session?.user?.id) {
-    return res.status(403)
+    return res.status(403).end()
   }
 
   const board = await Board.findOneAndUpdate(

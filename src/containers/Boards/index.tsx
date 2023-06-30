@@ -48,7 +48,7 @@ const Boards = () => {
           <div className="max-w-md w-full mt-8 space-y-5">
             <h3 className="text-4xl text-center font-special">Your Boards</h3>
             <Paper>
-              {data?.boards.length === 0 && isFetched ? (
+              {data?.boards?.length === 0 && isFetched ? (
                 <div className="flex flex-col items-center my-4">
                   No board yet
                 </div>

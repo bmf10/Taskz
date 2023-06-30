@@ -8,22 +8,23 @@ import { Menu } from "@headlessui/react"
 interface Props {
   readonly children: ReactNode
   readonly actions?: ReactNode
+  readonly className?: string
 }
 
-const Layout: FC<Props> = ({ children, actions }: Props) => {
+const Layout: FC<Props> = ({ children, actions, className }: Props) => {
   const { data: session } = useSession()
 
   return (
     <div className="min-w-full min-h-full">
       <header className="flex flex-row bg-blue-400 px-4 py-1 shadow-sm fixed w-full justify-between items-center z-10">
         <Link href="/">
-          <h1 className="text-4xl text-white font-special leading-none">
+          <h1 className="text-4xl text-white font-special leading-none w-20">
             Taskz
           </h1>
         </Link>
         {actions}
         <Dropdown
-          className="w-8 h-8"
+          className="w-20 h-8 flex justify-end"
           trigger={
             <Menu.Button>
               <div className="rounded-full">
@@ -52,7 +53,9 @@ const Layout: FC<Props> = ({ children, actions }: Props) => {
           </Menu.Item>
         </Dropdown>
       </header>
-      <article className="pt-14 px-4 pb-9 min-h-screen">{children}</article>
+      <article className={`pt-14 px-4 pb-9 min-h-screen ${className}`}>
+        {children}
+      </article>
       <footer className="bg-zinc-800 text-white fixed bottom-0 w-full p-1 text-center text-sm">
         <span>
           Made with ☕️ by{" "}
@@ -68,6 +71,10 @@ const Layout: FC<Props> = ({ children, actions }: Props) => {
       </footer>
     </div>
   )
+}
+
+Layout.defaultProps = {
+  className: "",
 }
 
 export default Layout

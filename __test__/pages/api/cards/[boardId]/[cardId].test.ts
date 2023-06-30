@@ -13,22 +13,24 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { ObjectId } from "mongodb"
 import Board from "@/models/Board"
 import dbConnect from "@/libs/mongoose"
-import handler from "@/pages/api/boards/[boardId]"
-import board from "@/pages/api/boards"
+import handler from "@/pages/api/cards/[boardId]/[cardId]"
+import card from "@/pages/api/cards/[boardId]"
+import Card from "@/models/Card"
 
 type ApiRequest = NextApiRequest & ReturnType<typeof createRequest>
 type APiResponse = NextApiResponse & ReturnType<typeof createResponse>
 
 jest.mock("next-auth")
 
-interface MockBoard {
+interface MockCard {
   readonly _id: ObjectId
   readonly order: number
 }
 
-describe("Boards DELETE API Endpoint", () => {
+describe("Cards DELETE API Endpoint", () => {
   const id = new ObjectId("delete123456")
-  let boards = [] as MockBoard[]
+  let board: undefined | { _id: ObjectId }
+  let cards = [] as MockCard[]
   ;(getServerSession as jest.Mock).mockReturnValue({
     expires: new Date(Date.now() + 2 * 86400).toISOString(),
     user: { id },
@@ -42,26 +44,30 @@ describe("Boards DELETE API Endpoint", () => {
 
   beforeAll(async () => {
     await dbConnect()
-    const insertedBoards = await Board.insertMany(
+    board = await Board.create({ name: "Board", userId: id, order: 1 })
+
+    const insertedCards = await Card.insertMany(
       Array.from({ length: 3 }).map((_, i) => ({
-        name: `Board ${i + 1}`,
+        name: `Card ${i + 1}`,
         userId: id,
         order: i + 1,
+        boardId: board!._id,
       }))
     )
 
-    boards = insertedBoards.map((v) => ({
+    cards = insertedCards.map((v) => ({
       _id: new ObjectId(v._id),
       order: v.order,
     }))
   })
 
-  test("Board should be deleted", async () => {
+  test("Card should be deleted", async () => {
     const { req, res } = mockRequestResponse({
       method: "DELETE",
-      url: `/api/boards/${boards[0]._id.toString()}`,
+      url: `/api/cards/${board!._id.toString()}/${cards[0]._id.toString()}`,
       query: {
-        boardId: boards[0]._id.toString(),
+        boardId: board!._id.toString(),
+        cardId: cards[0]._id.toString(),
       },
     })
 
@@ -69,22 +75,27 @@ describe("Boards DELETE API Endpoint", () => {
 
     const getData = mockRequestResponse({
       method: "GET",
+      url: `/api/cards/${board!._id.toString()}`,
+      query: {
+        boardId: board!._id.toString(),
+      },
     })
 
-    await board(getData.req, getData.res)
+    await card(getData.req, getData.res)
 
     const data = getData.res._getJSONData()
 
-    expect(data.boards.length).toBe(2)
+    expect(data.cards.length).toBe(2)
     expect(res.statusCode).toBe(201)
   })
 
-  test("Board should be returned", async () => {
+  test("Card should be returned", async () => {
     const { req, res } = mockRequestResponse({
       method: "GET",
-      url: `/api/boards/${boards[1]._id.toString()}`,
+      url: `/api/cards/${board!._id.toString()}/${cards[1]._id.toString()}`,
       query: {
-        boardId: boards[1]._id.toString(),
+        boardId: board!._id.toString(),
+        cardId: cards[1]._id.toString(),
       },
     })
 
@@ -92,8 +103,8 @@ describe("Boards DELETE API Endpoint", () => {
 
     const data = res._getJSONData()
 
-    expect(res.statusCode).toBe(201)
-    expect(typeof data.board._id).toBe("string")
+    expect(res.statusCode).toBe(200)
+    expect(typeof data.card._id).toBe("string")
   })
 
   afterAll(async () => {
@@ -101,5 +112,6 @@ describe("Boards DELETE API Endpoint", () => {
     await Board.deleteMany({
       userId: new ObjectId(id),
     })
+    await Card.deleteMany({ boardId: new ObjectId(board!._id) })
   })
 })

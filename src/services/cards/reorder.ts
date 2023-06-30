@@ -1,11 +1,15 @@
-import Board, { IBoard } from "@/models/Board"
+import Card, { ICard } from "@/models/Card"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { ObjectId } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth"
 
 interface Body {
-  readonly boards: Pick<IBoard, "_id" | "order">[]
+  readonly cards: Pick<ICard, "_id" | "order">[]
+}
+
+interface Query {
+  readonly boardId: string
 }
 
 const reorderHandler = async (
@@ -18,19 +22,20 @@ const reorderHandler = async (
     return res.status(403).end()
   }
 
-  const { boards } = req.body as Body
+  const { cards } = req.body as Body
+  const { boardId } = req.query as unknown as Query
 
-  const updatedBoards = await Promise.all(
-    boards.map(({ _id, order }) =>
-      Board.findByIdAndUpdate(
-        new ObjectId(_id),
+  const updatedCards = await Promise.all(
+    cards.map(({ _id, order }) =>
+      Card.findOneAndUpdate(
+        { _id: new ObjectId(_id), boardId: new ObjectId(boardId) },
         { order },
         { new: true }
       ).exec()
     )
   )
 
-  return res.status(200).json({ boards: updatedBoards })
+  return res.status(200).json({ cards: updatedCards })
 }
 
 export default reorderHandler

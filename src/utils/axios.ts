@@ -2,9 +2,8 @@
 import OgAxios, { AxiosResponse } from "axios"
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || typeof window === "object"
-    ? `${window.location.origin}/api`
-    : ""
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window === "object" ? `${window.location.origin}/api` : "")
 
 const axios = OgAxios.create({
   baseURL: BASE_URL,

@@ -10,6 +10,7 @@ interface Props {
   readonly labelClassName?: string
   readonly helper?: string
   readonly error?: string
+  readonly className?: string
 }
 
 const Input: FC<Props> = ({
@@ -18,9 +19,10 @@ const Input: FC<Props> = ({
   labelClassName,
   error,
   helper,
+  className,
 }: Props) => {
   return (
-    <div className="mb-4 overflow-hidden transition-all">
+    <div className={`mb-4 overflow-hidden transition-all ${className}`}>
       {label ? (
         <label
           className={`text-gray-700 text-sm mb-2 ${
@@ -55,6 +57,10 @@ const Input: FC<Props> = ({
       </div>
     </div>
   )
+}
+
+Input.defaultProps = {
+  className: "",
 }
 
 export default Input

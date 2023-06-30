@@ -1,31 +1,37 @@
-import Board from "@/models/Board"
+import Card from "@/models/Card"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { ObjectId } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth"
 
+interface Body {
+  readonly name: string
+  readonly cardId: string
+}
+
 interface Query {
   readonly boardId: string
 }
 
-const deleteHandler = async (
+const patchHandler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<unknown> => {
   const session = await getServerSession(req, res, authOptions)
+  const { name, cardId } = req.body as Body
   const { boardId } = req.query as unknown as Query
 
   if (!session?.user?.id) {
     return res.status(403).end()
   }
 
-  const board = await Board.findOneAndUpdate(
-    { userId: new ObjectId(session!.user!.id), _id: new ObjectId(boardId) },
-    { isDeleted: true },
+  const card = await Card.findOneAndUpdate(
+    { boardId: new ObjectId(boardId), _id: new ObjectId(cardId) },
+    { name },
     { new: true }
   ).exec()
 
-  return res.status(201).json({ board })
+  return res.status(201).json({ card })
 }
 
-export default deleteHandler
+export default patchHandler

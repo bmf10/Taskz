@@ -1,4 +1,4 @@
-import Board from "@/models/Board"
+import Card from "@/models/Card"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { ObjectId } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
@@ -8,7 +8,7 @@ interface Query {
   readonly boardId: string
 }
 
-const deleteHandler = async (
+const getHandler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<unknown> => {
@@ -19,13 +19,13 @@ const deleteHandler = async (
     return res.status(403).end()
   }
 
-  const board = await Board.findOneAndUpdate(
-    { userId: new ObjectId(session!.user!.id), _id: new ObjectId(boardId) },
-    { isDeleted: true },
-    { new: true }
-  ).exec()
+  const cards = await Card.find({
+    boardId: new ObjectId(boardId),
+  })
+    .sort({ order: "asc" })
+    .exec()
 
-  return res.status(201).json({ board })
+  return res.status(200).json({ cards })
 }
 
-export default deleteHandler
+export default getHandler

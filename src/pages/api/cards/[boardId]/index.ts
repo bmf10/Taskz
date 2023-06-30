@@ -1,7 +1,8 @@
 import { NextApiHandler } from "next"
 import dbConnect from "@/libs/mongoose"
-import deleteHandler from "@/services/boards/delete"
-import findOneHandler from "@/services/boards/findOne"
+import getHandler from "@/services/cards/get"
+import postHandler from "@/services/cards/post"
+import patchHandler from "@/services/cards/patch"
 
 const requestHandler: NextApiHandler = async (req, res) => {
   try {
@@ -9,10 +10,13 @@ const requestHandler: NextApiHandler = async (req, res) => {
 
     switch (req.method) {
       case "GET": {
-        return await findOneHandler(req, res)
+        return await getHandler(req, res)
       }
-      case "DELETE": {
-        return await deleteHandler(req, res)
+      case "POST": {
+        return await postHandler(req, res)
+      }
+      case "PATCH": {
+        return await patchHandler(req, res)
       }
       default: {
         return res.status(404).end()

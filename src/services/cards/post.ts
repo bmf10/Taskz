@@ -1,4 +1,5 @@
 import Board from "@/models/Board"
+import Card from "@/models/Card"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { ObjectId } from "mongodb"
 import { NextApiRequest, NextApiResponse } from "next"
@@ -8,29 +9,43 @@ interface Body {
   readonly name: string
 }
 
+interface Query {
+  readonly boardId: string
+}
+
 const postHandler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<unknown> => {
   const session = await getServerSession(req, res, authOptions)
-  const userId = session!.user!.id
   const { name } = req.body as Body
+  const { boardId } = req.query as unknown as Query
 
   if (!session?.user?.id) {
     return res.status(403).end()
   }
 
-  const count = await Board.count({
-    userId: new ObjectId(userId),
+  const board = await Board.findById(boardId).exec()
+
+  if (!board) {
+    return res.status(404).end()
+  }
+
+  const count = await Card.count({
+    boardId: new ObjectId(boardId),
   })
 
-  const board = await Board.create({
+  const card = await Card.create({
     name: name,
-    userId: new ObjectId(userId),
+    boardId: new ObjectId(boardId),
     order: count + 1,
   })
 
-  return res.status(201).json({ board })
+  board.cards.push(card)
+
+  await board.save()
+
+  return res.status(201).json({ card })
 }
 
 export default postHandler
